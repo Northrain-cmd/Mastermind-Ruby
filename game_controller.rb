@@ -22,9 +22,9 @@ class GameController
 
     Upon each guess there will be clues provided:
 
-    #{'!'.colorize(background: :green)}    Represents a correct number, in the correct location.
+    #{' ! '.colorize(background: :green)}    Represents a correct number, in the correct location.
 
-    #{'!'.colorize(background: :yellow)}   Represents a correct number, but in the wrong location.
+    #{' ? '.colorize(background: :yellow)}   Represents a correct number, but in the wrong location.
 
     No feedback for a number that is not part of the Master Code (which is a hint).
 
@@ -32,7 +32,7 @@ class GameController
 
   WELCOME
 
-  attr_accessor :mode, :code
+  attr_accessor :mode, :code, :winner
 
   private
 
@@ -46,13 +46,35 @@ class GameController
     @mode = input
   end
 
+  def game_cycle(player)
+    12.times do
+      player_guess = player.crack_code
+      give_feedback(player_guess)
+      if guessed_code?(player_guess)
+        @winner = 1
+        break
+      end
+    end
+  end
+
+  def guessed_code?(player_guess)
+    player_guess == code.join
+  end
+
+  def declare_winner
+    if winner == 1
+      puts 'Congaratulations!', "You've beaten the machine!"
+    else puts 'You are out of tries, the machine is superior'
+    end
+  end
+
   def give_feedback(code)
     p @code, code
     code.chars.each_with_index do |number, index|
       if number == @code[index].to_s
-        print '!'.colorize(background: :green), '  '
+        print ' ! '.colorize(background: :green), '  '
       elsif @code.include? number.to_i
-        print '?'.colorize(background: :yellow), '  '
+        print ' ? '.colorize(background: :yellow), '  '
       end
     end
   end
@@ -66,9 +88,8 @@ class GameController
       player = Player.new('Player 1')
       computer = Computer.new
       @code = computer.create_code
-      12.times do
-        give_feedback(player.crack_code)
-      end
+      game_cycle(player)
+      declare_winner
     end
   end
 end
