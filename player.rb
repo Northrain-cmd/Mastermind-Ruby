@@ -23,7 +23,7 @@ class Player
   public
 
   def winning_message
-    puts '', "Congratulations! You've defeated the machine"
+    puts "\n", "Congratulations! You've defeated the machine"
   end
 
   def create_code

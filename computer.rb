@@ -10,7 +10,7 @@ class Computer < Player
   end
 
   def winning_message
-    puts '', 'Sorry, computer wins this time!'
+    puts "\n", 'Sorry, computer wins this time!'
   end
 
   def create_code
@@ -27,7 +27,6 @@ class Computer < Player
   end
 
   def crack_code(feedback)
-    p feedback
     code = []
     4.times do
       code.push(rand(1...7).to_s)

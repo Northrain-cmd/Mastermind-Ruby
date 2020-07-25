@@ -68,7 +68,7 @@ class GameController
         break
       end
     end
-    puts '', 'The Code Master wins!' unless game_over
+    puts "\n", "The Code Master wins!\nThe code was #{@code.join.to_i}" unless game_over
   end
 
   def guessed_code?(player_guess)
@@ -76,14 +76,14 @@ class GameController
   end
 
   def give_feedback(code)
-    p @code, code
+    puts '', '', code.to_i, ''
     code.chars.each_with_index do |number, index|
       if number == @code[index].to_s
         @feedback[index] = [1, @code[index]]
-        print ' ! '.colorize(background: :green), '  '
+        print ' ! '.colorize(background: :green), '   '
       elsif @code.include? number.to_i
         @feedback[index] = [0, @code[index]]
-        print ' ? '.colorize(background: :yellow), '  '
+        print ' ? '.colorize(background: :yellow), '   '
       end
     end
   end
