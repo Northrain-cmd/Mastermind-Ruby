@@ -14,7 +14,7 @@ class GameController
     There are six different numbers:
     1   2   3   4   5   6
 
-    The Code Maker selects four digits to create a 'Master Code'.
+    The Code Master selects four digits to create a 'Master Code'.
 
     There can be two or more of the same number.
 
@@ -32,51 +32,93 @@ class GameController
 
   WELCOME
 
-  attr_accessor :mode, :code, :winner
+  attr_accessor :mode, :code, :winner, :maker, :breaker, :feedback, :game_over
+
+  def initialize
+    @feedback = {}
+    @game_over = false
+  end
 
   private
 
   def choose_mode
     input = 0
     loop do
-      puts 'Press "1" to be the Code MAKER', 'Press "2" to be the Code BREAKER'
+      puts 'Press "1" to be the Code MASTER', 'Press "2" to be the Code BREAKER'
       input = gets.chomp.to_i
       break if [1, 2].include?(input)
+
+      puts 'Invalid option'
     end
     @mode = input
   end
 
+  def show_win_msg(player)
+    @game_over = true
+    @winner = player
+    player.winning_message
+  end
+
   def game_cycle(player)
     12.times do
-      player_guess = player.crack_code
+      player_guess = player.crack_code(feedback)
       give_feedback(player_guess)
       if guessed_code?(player_guess)
-        @winner = 1
+        show_win_msg(player)
         break
       end
     end
+    puts '', 'The Code Master wins!' unless game_over
   end
 
   def guessed_code?(player_guess)
     player_guess == code.join
   end
 
-  def declare_winner
-    if winner == 1
-      puts 'Congaratulations!', "You've beaten the machine!"
-    else puts 'You are out of tries, the machine is superior'
-    end
-  end
-
   def give_feedback(code)
     p @code, code
     code.chars.each_with_index do |number, index|
       if number == @code[index].to_s
+        @feedback[index] = [1, @code[index]]
         print ' ! '.colorize(background: :green), '  '
       elsif @code.include? number.to_i
+        @feedback[index] = [0, @code[index]]
         print ' ? '.colorize(background: :yellow), '  '
       end
     end
+  end
+
+  def create_players
+    player = Player.new('Player 1')
+    @winner = player
+    computer = Computer.new
+    @breaker = player
+    @maker = computer
+    return unless @mode == 1
+
+    @breaker = computer
+    @maker = player
+  end
+
+  def new_game
+    @feedback = {}
+    @game_over = false
+    choose_mode
+    create_players
+    @code = @maker.create_code
+    game_cycle(@breaker)
+  end
+
+  def another_game?
+    puts 'Would you like to play again? (y/n)'
+    input = ''
+    loop do
+      input = gets.chomp
+      break if %w[y n].include?(input)
+
+      puts 'Invalid option'
+    end
+    input == 'y'
   end
 
   public
@@ -84,13 +126,10 @@ class GameController
   def start_game
     puts WELCOME_MESSAGE
     choose_mode
-    if @mode == 2
-      player = Player.new('Player 1')
-      computer = Computer.new
-      @code = computer.create_code
-      game_cycle(player)
-      declare_winner
-    end
+    create_players
+    @code = @maker.create_code
+    game_cycle(@breaker)
+    new_game while another_game?
   end
 end
 
